@@ -45,7 +45,7 @@ struct TwitterClientExample: ParsableCommand {
         let eventLoop = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         defer { try! eventLoop.syncShutdownGracefully() }
         let promise = eventLoop.next().makePromise(of: Void.self)
-        promise.completeWithAsync {
+        promise.completeWithTask {
             try await self.runAsync()
         }
         try promise.futureResult.wait()
