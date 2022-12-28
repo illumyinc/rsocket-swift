@@ -60,7 +60,7 @@ extension ClientBootstrap: RSocketCore.ClientBootstrap {
         responder: RSocketCore.RSocket?
     ) -> EventLoopFuture<CoreClient> {
         let requesterPromise = group.next().makePromise(of: RSocketCore.RSocket.self)
-        
+
         if tlsOptions != nil || endpoint.requiresTLS {
             let options = tlsOptions ?? Self.makeDefaultTLSOptions()
             _ = bootstrap.tlsOptions(options)

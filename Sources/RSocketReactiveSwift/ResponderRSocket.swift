@@ -15,9 +15,9 @@
  */
 
 
+import Foundation
 import ReactiveSwift
 import RSocketCore
-import Foundation
 
 public protocol ResponderRSocket {
     func metadataPush(metadata: Data)

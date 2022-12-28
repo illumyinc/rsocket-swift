@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "RSocket",
+    platforms: [.iOS("13.0")],
     products: [
         // Core
         .library(name: "RSocketCore", targets: ["RSocketCore"]),
@@ -29,7 +30,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/ReactiveCocoa/ReactiveSwift.git", from: "6.6.0"),
-        .package(url: "https://github.com/apple/swift-nio", from: "2.30.0"),
+        .package(url: "https://github.com/apple/swift-nio", from: "2.32.1"),
         .package(url: "https://github.com/apple/swift-nio-extras", from: "1.8.0"),
         .package(url: "https://github.com/apple/swift-nio-transport-services", from: "1.9.2"),
         .package(url: "https://github.com/apple/swift-nio-ssl", from: "2.10.4"),
@@ -38,8 +39,9 @@ let package = Package(
     targets: [
         // Core
         .target(name: "RSocketCore", dependencies: [
-            .product(name: "NIO", package: "swift-nio"),
+            .product(name: "NIOCore", package: "swift-nio"),
             .product(name: "NIOFoundationCompat", package: "swift-nio"),
+            .product(name: "NIOExtras", package: "swift-nio-extras"),
         ]),
 
         // Reactive streams
@@ -57,25 +59,26 @@ let package = Package(
         // Channel
         .target(name: "RSocketTSChannel", dependencies: [
             "RSocketCore",
-            .product(name: "NIO", package: "swift-nio"),
+            .product(name: "NIOCore", package: "swift-nio"),
             .product(name: "NIOTransportServices", package: "swift-nio-transport-services")
         ]),
         .target(name: "RSocketNIOChannel", dependencies: [
             "RSocketCore",
-            .product(name: "NIO", package: "swift-nio"),
+            .product(name: "NIOPosix", package: "swift-nio"),
+            .product(name: "NIOCore", package: "swift-nio"),
             .product(name: "NIOSSL", package: "swift-nio-ssl")
         ]),
 
         // Transport protocol
         .target(name: "RSocketWSTransport", dependencies: [
             "RSocketCore",
-            .product(name: "NIO", package: "swift-nio"),
+            .product(name: "NIOCore", package: "swift-nio"),
             .product(name: "NIOHTTP1", package: "swift-nio"),
             .product(name: "NIOWebSocket", package: "swift-nio"),
         ]),
         .target(name: "RSocketTCPTransport", dependencies: [
             "RSocketCore",
-            .product(name: "NIO", package: "swift-nio"),
+            .product(name: "NIOCore", package: "swift-nio"),
             .product(name: "NIOExtras", package: "swift-nio-extras")
         ]),
 
@@ -84,12 +87,17 @@ let package = Package(
         .testTarget(name: "RSocketCoreTests", dependencies: [
             "RSocketCore",
             "RSocketTestUtilities",
+            .product(name: "NIOCore", package: "swift-nio"),
+            .product(name: "NIOPosix", package: "swift-nio"),
+            .product(name: "NIOEmbedded", package: "swift-nio"),
             .product(name: "NIOExtras", package: "swift-nio-extras"),
             .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
         ]),
         .testTarget(name: "RSocketCorePerformanceTests", dependencies: [
             "RSocketCore",
             "RSocketTestUtilities",
+            .product(name: "NIOCore", package: "swift-nio"),
+            .product(name: "NIOPosix", package: "swift-nio"),
             .product(name: "NIOExtras", package: "swift-nio-extras"),
             .product(name: "NIOTransportServices", package: "swift-nio-transport-services"),
         ]),
@@ -99,12 +107,23 @@ let package = Package(
             "RSocketReactiveSwift",
             "RSocketTestUtilities",
             "ReactiveSwift",
-            .product(name: "NIO", package: "swift-nio"),
+            .product(name: "NIOCore", package: "swift-nio"),
+            .product(name: "NIOEmbedded", package: "swift-nio"),
         ]),
         .testTarget(name: "RSocketWSTransportTests", dependencies: [
             "RSocketWSTransport"
         ]),
-        
+        .testTarget(name: "RSocketNIOChannelTests", dependencies: [
+            "RSocketNIOChannel",
+            "RSocketWSTransport",
+            "RSocketTestUtilities"
+        ]),
+        .testTarget(name: "RSocketTSChannelTests", dependencies: [
+            "RSocketTSChannel",
+            "RSocketWSTransport",
+            "RSocketTestUtilities",
+            "RSocketCore"
+        ]),
         // Examples
         .executableTarget(
             name: "TimerClientExample",
@@ -113,6 +132,7 @@ let package = Package(
                 "RSocketNIOChannel",
                 "RSocketWSTransport",
                 "RSocketReactiveSwift",
+                .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "ReactiveSwift", package: "ReactiveSwift"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ],
@@ -125,6 +145,7 @@ let package = Package(
                 "RSocketNIOChannel",
                 "RSocketWSTransport",
                 "RSocketReactiveSwift",
+                .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "ReactiveSwift", package: "ReactiveSwift"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ],
@@ -137,6 +158,7 @@ let package = Package(
                 "RSocketNIOChannel",
                 "RSocketTCPTransport",
                 "RSocketReactiveSwift",
+                .product(name: "NIOCore", package: "swift-nio"),
                 .product(name: "ReactiveSwift", package: "ReactiveSwift"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ],

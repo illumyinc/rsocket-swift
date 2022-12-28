@@ -1,5 +1,6 @@
-import ArgumentParser
 import Foundation
+import ArgumentParser
+import NIOCore
 import ReactiveSwift
 import RSocketCore
 import RSocketNIOChannel
@@ -27,7 +28,6 @@ struct VanillaClientExample: ParsableCommand {
             request: Data()
         )
         let requestProducer = client.requester(RequestResponse(), request: Data("HelloWorld".utf8))
-
         streamProducer.logEvents(identifier: "stream1").take(first: 1).start()
         streamProducer.logEvents(identifier: "stream3").take(first: 10).start()
         streamProducer.logEvents(identifier: "stream5").take(first: 100).start()

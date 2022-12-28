@@ -1,5 +1,6 @@
-import ArgumentParser
 import Foundation
+import ArgumentParser
+import NIOCore
 import ReactiveSwift
 import RSocketCore
 import RSocketNIOChannel

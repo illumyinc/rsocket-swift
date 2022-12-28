@@ -57,7 +57,7 @@ extension ClientBootstrap: RSocketCore.ClientBootstrap {
         responder: RSocketCore.RSocket?
     ) -> EventLoopFuture<CoreClient> {
         let requesterPromise = group.next().makePromise(of: RSocketCore.RSocket.self)
-        
+
         let connectFuture = bootstrap
             .channelInitializer { [transport, config, sslContext] channel in
                 let otherHandlersBlock: () -> EventLoopFuture<Void> = {

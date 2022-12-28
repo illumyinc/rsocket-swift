@@ -6,6 +6,9 @@ import RSocketNIOChannel
 import RSocketReactiveSwift
 import RSocketWSTransport
 
+import NIOCore
+import NIOFoundationCompat
+
 extension URL: ExpressibleByArgument {
     public init?(argument: String) {
         guard let url = URL(string: argument) else { return nil }

@@ -15,8 +15,8 @@
  */
 
 import XCTest
-import NIO
 import RSocketCore
+import NIOCore
 
 public final class TestRSocket: RSocket {
     public var encoding: ConnectionEncoding
@@ -30,7 +30,7 @@ public final class TestRSocket: RSocket {
     private let line: UInt
     
     public init(
-        metadataPush: ((Data) -> ())? = nil,
+        metadataPush: ((ByteBuffer) -> ())? = nil,
         fireAndForget: ((Payload) -> ())? = nil,
         requestResponse: ((Payload, UnidirectionalStream) -> Cancellable)? = nil,
         stream: ((Payload, Int32, UnidirectionalStream) -> Subscription)? = nil,
@@ -50,7 +50,7 @@ public final class TestRSocket: RSocket {
     }
     
     
-    public func metadataPush(metadata: Data) {
+    public func metadataPush(metadata: ByteBuffer) {
         guard let metadataPush = metadataPush else {
             XCTFail("metadataPush not expected to be called ", file: file, line: line)
             return

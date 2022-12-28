@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import Foundation
 import ReactiveSwift
 import RSocketCore
-import Foundation
 
 internal struct ResponderAdapter: RSocketCore.RSocket {    
     private let responder: ResponderRSocket
