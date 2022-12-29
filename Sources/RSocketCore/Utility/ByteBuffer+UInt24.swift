@@ -36,12 +36,12 @@ extension ByteBuffer {
             leastSignificant = UInt8(truncatingIfNeeded: integer)
         }
         switch endianness {
-        case .big:
-            setInteger(mostSignificant, at: index, endianness: .big)
-            setInteger(leastSignificant, at: index + 2, endianness: .big)
-        case .little:
-            setInteger(leastSignificant, at: index, endianness: .little)
-            setInteger(mostSignificant, at: index + 1, endianness: .little)
+            case .big:
+                setInteger(mostSignificant, at: index, endianness: .big)
+                setInteger(leastSignificant, at: index + 2, endianness: .big)
+            case .little:
+                setInteger(leastSignificant, at: index, endianness: .little)
+                setInteger(mostSignificant, at: index + 1, endianness: .little)
         }
         return 3
     }
@@ -66,16 +66,16 @@ extension ByteBuffer {
         let mostSignificant: UInt16
         let leastSignificant: UInt8
         switch endianness {
-        case .big:
-            guard let uint16 = getInteger(at: index, endianness: .big, as: UInt16.self),
-                  let uint8 = getInteger(at: index + 2, endianness: .big, as: UInt8.self) else { return nil }
-            mostSignificant = uint16
-            leastSignificant = uint8
-        case .little:
-            guard let uint8 = getInteger(at: index, endianness: .little, as: UInt8.self),
-                  let uint16 = getInteger(at: index + 1, endianness: .little, as: UInt16.self) else { return nil }
-            mostSignificant = uint16
-            leastSignificant = uint8
+            case .big:
+                guard let uint16 = getInteger(at: index, endianness: .big, as: UInt16.self),
+                      let uint8 = getInteger(at: index + 2, endianness: .big, as: UInt8.self) else { return nil }
+                mostSignificant = uint16
+                leastSignificant = uint8
+            case .little:
+                guard let uint8 = getInteger(at: index, endianness: .little, as: UInt8.self),
+                      let uint16 = getInteger(at: index + 1, endianness: .little, as: UInt16.self) else { return nil }
+                mostSignificant = uint16
+                leastSignificant = uint8
         }
         return (UInt32(mostSignificant) << 8) &+ UInt32(leastSignificant)
     }

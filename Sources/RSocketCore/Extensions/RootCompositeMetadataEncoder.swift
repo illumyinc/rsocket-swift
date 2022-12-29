@@ -15,24 +15,38 @@
  */
 
 import NIO
+import NIOCore
 
 public struct RootCompositeMetadataEncoder: MetadataEncoder {
     public typealias Metadata = [CompositeMetadata]
-    
+
     @inlinable
     public var mimeType: MIMEType { .messageXRSocketCompositeMetadataV0 }
-    
+
     @usableFromInline
     internal let mimeTypeEncoder: MIMETypeEncoder
-    
+
     @inlinable
     public init(mimeTypeEncoder: MIMETypeEncoder = MIMETypeEncoder()) {
         self.mimeTypeEncoder = mimeTypeEncoder
     }
-    
+
     @inlinable
     public func encode(_ metadata: Metadata, into buffer: inout ByteBuffer) throws {
-        fatalError("not implemented")
+        for compositeMetadata in metadata {
+            try encodeSingleCompositeMetadata(compositeMetadata, into: &buffer)
+        }
+    }
+
+    @inlinable
+    internal func encodeSingleCompositeMetadata(
+        _ metadata: CompositeMetadata,
+        into buffer: inout ByteBuffer
+    ) throws {
+        try mimeTypeEncoder.encode(metadata.mimeType, into: &buffer)
+        let data = metadata.data
+        buffer.writeUInt24(UInt(data.count))
+        buffer.writeData(data)
     }
 }
 

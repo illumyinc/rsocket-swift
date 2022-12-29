@@ -19,10 +19,10 @@ import NIO
 public struct BearerAuthenticationDecoder: MetadataDecoder {
     @usableFromInline
     internal var authenticationDecoder: AuthenticationDecoder = .init()
-    
+
     @inlinable
     public var mimeType: MIMEType { authenticationDecoder.mimeType }
-    
+
     @inlinable
     public func decode(from buffer: inout ByteBuffer) throws -> String {
         fatalError("not implemented")
@@ -33,17 +33,24 @@ extension MetadataDecoder where Self == BearerAuthenticationDecoder {
     public static var bearerAuthentication: Self { .init() }
 }
 
-
 public struct BearerAuthenticationEncoder: MetadataEncoder {
     @usableFromInline
+    internal let streamMetadataKnownMask: UInt8 = 0b10000000
+
+    @usableFromInline
     internal var authenticationEncoder: AuthenticationEncoder = .init()
-    
+
     @inlinable
     public var mimeType: MIMEType { authenticationEncoder.mimeType }
-    
+
+    @inlinable
+    public init() {}
+
     @inlinable
     public func encode(_ metadata: String, into buffer: inout ByteBuffer) throws {
-        fatalError("not implemented")
+        buffer = ByteBuffer(integer: WellKnownAuthenticationTypeCode.bearer.rawValue | streamMetadataKnownMask)
+        var tokenBuffer = ByteBuffer(string: metadata)
+        buffer.writeBuffer(&tokenBuffer)
     }
 }
 

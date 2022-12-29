@@ -20,7 +20,6 @@ import NIO
 import RSocketCore
 import _NIOConcurrency
 
-@available(macOS 9999, iOS 9999, watchOS 9999, tvOS 9999, *)
 extension RequesterRSocket {
     public func callAsFunction<Metadata>(_ metadataPush: MetadataPush<Metadata>, metadata: Metadata) throws {
         self.metadataPush(metadata: try metadataPush.encoder.encode(metadata))
@@ -75,7 +74,6 @@ extension RequesterRSocket {
     }
 }
 
-@available(macOS 9999, iOS 9999, watchOS 9999, tvOS 9999, *)
 public struct RequesterRSocket {
     private let requester: RSocketCore.RSocket
     
@@ -182,7 +180,6 @@ public struct RequesterRSocket {
     }
 }
 
-@available(macOS 9999, iOS 9999, watchOS 9999, tvOS 9999, *)
 internal final class AsyncStreamAdapter: UnidirectionalStream {
     private var continuation: AsyncThrowingStream<Payload, Swift.Error>.Continuation
     init(continuation: AsyncThrowingStream<Payload, Swift.Error>.Continuation) {

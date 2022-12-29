@@ -18,7 +18,6 @@
 import Foundation
 import RSocketCore
 
-@available(macOS 9999, iOS 9999, watchOS 9999, tvOS 9999, *)
 public protocol RSocket {
     func metadataPush(metadata: Data)
     func fireAndForget(payload: Payload)

@@ -18,7 +18,6 @@
 import RSocketCore
 import Foundation
 
-@available(macOS 9999, iOS 9999, watchOS 9999, tvOS 9999, *)
 struct ResponderAdapter: RSocketCore.RSocket {
     var responder: RSocket
     let encoding: ConnectionEncoding 
@@ -89,7 +88,6 @@ struct ResponderAdapter: RSocketCore.RSocket {
     }
 }
 
-@available(macOS 9999, iOS 9999, watchOS 9999, tvOS 9999, *)
 fileprivate class RequestResponseResponder: Cancellable {
     private let task: Task<Void, Never>
     
@@ -115,7 +113,6 @@ fileprivate class RequestResponseResponder: Cancellable {
     }
 }
 
-@available(macOS 9999, iOS 9999, watchOS 9999, tvOS 9999, *)
 fileprivate class RequestStreamResponder: Subscription {
     private let task: Task<Void, Never>
     
@@ -145,7 +142,6 @@ fileprivate class RequestStreamResponder: Subscription {
     }
 }
 
-@available(macOS 9999, iOS 9999, watchOS 9999, tvOS 9999, *)
 fileprivate class RequestChannelAsyncSequence: AsyncSequence, UnidirectionalStream {
     typealias AsyncIterator = AsyncThrowingStream<Payload, Swift.Error>.AsyncIterator
     typealias Element = Payload
