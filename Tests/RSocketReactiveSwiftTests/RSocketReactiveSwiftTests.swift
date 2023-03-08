@@ -332,4 +332,65 @@ final class RSocketReactiveSwiftTests: XCTestCase {
         ], timeout: 0.1)
     }
 
+    /// test case for closing Rsocket connection using reactiveSwiftClient instance
+    /// reactiveSwiftClient.dispose() closes the Rsocket connection
+    func testConnectionDisposeSuccess() {
+        let serverResponder = TestRSocket()
+        let clientResponder = TestRSocket()
+        let (server, client) = setup(server: serverResponder,client: clientResponder)
+        defer {
+            // closing channel connection
+           XCTAssertNoThrow(try server.shutdown().first()?.get())
+        }
+        XCTAssertNotNil(server)
+        XCTAssertNotNil(client)
+        // checking if connection is active
+        XCTAssertFalse(client.isDisposed)
+        // closing connection using dispose method
+        XCTAssertNoThrow(try client.shutdown().first()?.get())
+        // checking if connection is inactive
+        XCTAssertTrue(client.isDisposed)
+    }
+    func testConnectionDisposeListener() {
+        // Creating expectation
+        let didReceiveConnectionclosedEvent = expectation(description: "did receive Connection closed  event ")
+        let serverResponder: RSocketReactiveSwift.ResponderRSocket? = TestRSocket()
+        let clientResponder: RSocketReactiveSwift.ResponderRSocket? = TestRSocket()
+        let (serverMultiplexer, clientMultiplexer) = TestDemultiplexer.pipe(
+            serverResponder: serverResponder.map { ResponderAdapter(responder: $0, encoding: .default) },
+            clientResponder: clientResponder.map { ResponderAdapter(responder: $0, encoding: .default) }
+        )
+        // Channel creation
+        let serverChannel = EmbeddedChannel()
+        // Making channel Active
+        XCTAssertNoThrow(try serverChannel.connect(to: SocketAddress.init(ipAddress: "127.0.0.1", port: 0)).wait())
+        let clientChannel = EmbeddedChannel()
+        XCTAssertNoThrow(try clientChannel.connect(to: SocketAddress.init(ipAddress: "127.0.0.1", port: 0)).wait())
+        // Creating Reactive swift client
+        let server =  ReactiveSwiftClient(CoreClient(requester: serverMultiplexer.requester, channel: serverChannel))
+        let client =  ReactiveSwiftClient(CoreClient(requester: clientMultiplexer.requester, channel: clientChannel))
+        defer {
+            // closing channel connection
+            XCTAssertNoThrow(try serverChannel.finish())
+        }
+        XCTAssertNotNil(server)
+        XCTAssertNotNil(client)
+        // client connection closed event signal producer
+        client.shutdownProducer.startWithSignal({ signal, interruptHandle in
+            signal.flatMapError({ error -> Signal<Void, Error> in
+                XCTFail("\(error)")
+                return .empty
+            }).materialize().collect().observeValues { values in
+                didReceiveConnectionclosedEvent.fulfill()
+            }
+        })
+        // checking if connection is active
+        XCTAssertFalse(client.isDisposed)
+        // closing connection using dispose method
+        XCTAssertNoThrow(try clientChannel.finish())
+        // checking if connection is inactive
+        XCTAssertTrue(client.isDisposed)
+        self.wait(for: [didReceiveConnectionclosedEvent], timeout: 0.1)
+    }
 }
+

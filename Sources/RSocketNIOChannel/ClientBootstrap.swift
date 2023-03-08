@@ -18,7 +18,7 @@ import NIO
 import NIOSSL
 import RSocketCore
 
-final public class ClientBootstrap<Transport: TransportChannelHandler> {
+public final class ClientBootstrap<Transport: TransportChannelHandler> {
     private let group: EventLoopGroup
     private let bootstrap: NIO.ClientBootstrap
     public let config: ClientConfiguration
@@ -51,6 +51,7 @@ extension ClientBootstrap: RSocketCore.ClientBootstrap {
     static func makeDefaultSSLContext() throws -> NIOSSLContext {
         try .init(configuration: .clientDefault)
     }
+
     public func connect(
         to endpoint: Transport.Endpoint,
         payload: Payload,
@@ -64,15 +65,26 @@ extension ClientBootstrap: RSocketCore.ClientBootstrap {
                     transport.addChannelHandler(
                         channel: channel,
                         maximumIncomingFragmentSize: config.fragmentation.maximumIncomingFragmentSize,
-                        endpoint: endpoint
-                    ) {
-                        channel.pipeline.addRSocketClientHandlers(
-                            config: config,
-                            setupPayload: payload,
-                            responder: responder,
-                            connectedPromise: requesterPromise
-                        )
-                    }
+                        endpoint: endpoint,
+                        upgradeComplete: {
+                            channel.pipeline.addRSocketClientHandlers(
+                                config: config,
+                                setupPayload: payload,
+                                responder: responder,
+                                connectedPromise: requesterPromise
+                            )
+                        }, resultHandler: { result in
+                            if case let .failure(error) = result {
+                                requesterPromise.fail(error)
+                                return requesterPromise.futureResult.eventLoop.makeFailedFuture(error)
+                            }
+                            return channel.pipeline.addRSocketClientHandlers(
+                                config: config,
+                                setupPayload: payload,
+                                responder: responder,
+                                connectedPromise: requesterPromise
+                            )
+                        })
                 }
                 if sslContext != nil || endpoint.requiresTLS {
                     do {
@@ -88,8 +100,12 @@ extension ClientBootstrap: RSocketCore.ClientBootstrap {
             }
             .connect(host: endpoint.host, port: endpoint.port)
 
-        return connectFuture
-            .flatMap { _ in requesterPromise.futureResult }
-            .map(CoreClient.init)
+        connectFuture.cascadeFailure(to: requesterPromise)
+        return connectFuture.flatMap { channel in
+            requesterPromise.futureResult.map { socket in
+                // initializing core client using channel object
+                CoreClient(requester: socket, channel: channel)
+            }
+        }
     }
 }
